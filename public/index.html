@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ComplaintLead — Find customers who are complaining</title>
+  <style>
+    :root{
+      --bg:#0f172a;          /* slate-900 */
+      --panel:#1e293b;       /* slate-800 */
+      --panel-2:#273449;
+      --border:#334155;      /* slate-700 */
+      --text:#e2e8f0;        /* slate-200 */
+      --muted:#94a3b8;       /* slate-400 */
+      --indigo:#6366f1;      /* indigo-500 */
+      --indigo-600:#4f46e5;
+      --indigo-glow:rgba(99,102,241,.35);
+      --reddit:#ff4500;
+      --x:#e7e9ea;
+      --radius:14px;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{
+      font-family:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+      background:radial-gradient(1200px 600px at 80% -10%, #1e1b4b 0%, var(--bg) 55%);
+      color:var(--text);
+      min-height:100vh;
+      line-height:1.5;
+    }
+    .wrap{max-width:1080px;margin:0 auto;padding:32px 20px 80px}
+
+    /* Header */
+    header{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px}
+    .brand{display:flex;align-items:center;gap:12px}
+    .logo{
+      width:38px;height:38px;border-radius:11px;
+      background:linear-gradient(135deg,var(--indigo),#8b5cf6);
+      display:grid;place-items:center;font-weight:800;font-size:18px;color:#fff;
+      box-shadow:0 0 0 1px rgba(255,255,255,.08), 0 8px 24px var(--indigo-glow);
+    }
+    .brand h1{font-size:19px;font-weight:700;letter-spacing:-.02em}
+    .brand span{font-size:12px;color:var(--muted);display:block;font-weight:500}
+    .pill{
+      font-size:12px;font-weight:600;color:var(--indigo);
+      background:rgba(99,102,241,.12);border:1px solid rgba(99,102,241,.3);
+      padding:6px 12px;border-radius:999px;
+    }
+
+    /* Hero */
+    .hero{margin-bottom:26px}
+    .hero h2{font-size:30px;font-weight:800;letter-spacing:-.03em;margin-bottom:8px}
+    .hero h2 em{font-style:normal;color:var(--indigo)}
+    .hero p{color:var(--muted);font-size:15px;max-width:640px}
+
+    /* Form */
+    .card{
+      background:var(--panel);border:1px solid var(--border);
+      border-radius:var(--radius);padding:22px;
+      box-shadow:0 20px 50px -30px rgba(0,0,0,.8);
+    }
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    .field{display:flex;flex-direction:column;gap:7px;margin-bottom:16px}
+    .field.full{grid-column:1 / -1}
+    label{font-size:13px;font-weight:600;color:var(--muted)}
+    label .opt{font-weight:400;opacity:.7}
+    input,textarea{
+      background:var(--panel-2);border:1px solid var(--border);
+      border-radius:10px;padding:11px 13px;color:var(--text);
+      font-size:14px;font-family:inherit;width:100%;outline:none;
+      transition:border-color .15s, box-shadow .15s;
+    }
+    input:focus,textarea:focus{border-color:var(--indigo);box-shadow:0 0 0 3px var(--indigo-glow)}
+    textarea{resize:vertical;min-height:74px}
+
+    /* Source toggle cards */
+    .source-label{font-size:13px;font-weight:600;color:var(--muted);margin-bottom:9px;display:block}
+    .source-cards{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .src{
+      position:relative;cursor:pointer;border:1px solid var(--border);
+      background:var(--panel-2);border-radius:12px;padding:14px 16px;
+      display:flex;align-items:center;gap:12px;transition:all .15s;
+    }
+    .src:hover{border-color:#475569}
+    .src input{position:absolute;opacity:0;pointer-events:none}
+    .src .badge{
+      width:34px;height:34px;border-radius:9px;display:grid;place-items:center;
+      font-weight:800;font-size:13px;flex-shrink:0;
+    }
+    .src .badge.reddit{background:rgba(255,69,0,.15);color:var(--reddit);border:1px solid rgba(255,69,0,.35)}
+    .src .badge.x{background:rgba(231,233,234,.12);color:var(--x);border:1px solid rgba(231,233,234,.25)}
+    .src .meta b{font-size:14px;display:block}
+    .src .meta small{font-size:12px;color:var(--muted)}
+    .src.active{border-color:var(--indigo);box-shadow:0 0 0 3px var(--indigo-glow);background:rgba(99,102,241,.07)}
+
+    /* Button */
+    .actions{display:flex;justify-content:flex-end;margin-top:20px}
+    .btn{
+      background:linear-gradient(135deg,var(--indigo),#8b5cf6);
+      color:#fff;border:none;border-radius:11px;
+      padding:13px 26px;font-size:15px;font-weight:700;cursor:pointer;
+      display:inline-flex;align-items:center;gap:10px;
+      box-shadow:0 10px 30px -10px var(--indigo-glow);
+      transition:transform .12s, box-shadow .15s, opacity .15s;
+    }
+    .btn:hover{transform:translateY(-1px)}
+    .btn:disabled{opacity:.65;cursor:not-allowed;transform:none}
+    .spinner{
+      width:16px;height:16px;border:2px solid rgba(255,255,255,.4);
+      border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;
+    }
+    @keyframes spin{to{transform:rotate(360deg)}}
+
+    /* Results */
+    .results-head{display:flex;align-items:center;justify-content:space-between;margin:34px 2px 16px}
+    .results-head h3{font-size:18px;font-weight:700}
+    .results-head .count{font-size:13px;color:var(--muted)}
+    .empty{
+      text-align:center;color:var(--muted);padding:46px 20px;
+      border:1px dashed var(--border);border-radius:var(--radius);background:rgba(30,41,59,.4);
+    }
+    .empty b{color:var(--text);display:block;margin-bottom:6px}
+
+    .cards{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+    .lead{
+      background:var(--panel);border:1px solid var(--border);
+      border-radius:var(--radius);padding:18px;display:flex;flex-direction:column;gap:12px;
+      transition:transform .15s, border-color .15s;
+    }
+    .lead:hover{transform:translateY(-2px);border-color:#475569}
+    .lead .top{display:flex;align-items:center;justify-content:space-between}
+    .tag{
+      font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;
+      padding:4px 10px;border-radius:999px;display:inline-flex;align-items:center;gap:6px;
+    }
+    .tag.reddit{background:rgba(255,69,0,.14);color:var(--reddit)}
+    .tag.x{background:rgba(231,233,234,.12);color:var(--x)}
+    .tag .dot{width:6px;height:6px;border-radius:50%;background:currentColor}
+    .lead h4{font-size:15px;font-weight:700;line-height:1.35;letter-spacing:-.01em}
+    .lead .snip{font-size:13.5px;color:var(--muted);flex:1}
+    .lead .snip mark{background:rgba(99,102,241,.25);color:#c7d2fe;padding:0 2px;border-radius:3px}
+    .cta{
+      margin-top:4px;text-align:center;text-decoration:none;
+      background:rgba(99,102,241,.14);border:1px solid rgba(99,102,241,.35);
+      color:#c7d2fe;font-weight:600;font-size:13.5px;padding:10px;border-radius:10px;
+      transition:background .15s;
+    }
+    .cta:hover{background:rgba(99,102,241,.26)}
+
+    .error{
+      background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.4);
+      color:#fca5a5;padding:13px 16px;border-radius:10px;margin-top:16px;font-size:14px;
+    }
+
+    @media(max-width:720px){
+      .grid,.source-cards,.cards{grid-template-columns:1fr}
+      .hero h2{font-size:24px}
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="brand">
+        <div class="logo">CL</div>
+        <div>
+          <h1>ComplaintLead</h1>
+          <span>Find customers who are already complaining</span>
+        </div>
+      </div>
+      <div class="pill">MVP Demo</div>
+    </header>
+
+    <section class="hero">
+      <h2>Turn online <em>complaints</em> into warm leads.</h2>
+      <p>Describe your product and who it helps. We craft a precision search and surface real people venting about the exact problem you solve — on Reddit or X.</p>
+    </section>
+
+    <section class="card">
+      <div class="grid">
+        <div class="field">
+          <label for="category">Product Category / Industry</label>
+          <input id="category" type="text" placeholder="e.g. Project management SaaS" value="Productivity SaaS" />
+        </div>
+        <div class="field">
+          <label for="audience">Target Audience</label>
+          <input id="audience" type="text" placeholder="e.g. Remote startup founders" value="Remote startup founders" />
+        </div>
+      </div>
+
+      <div class="field full">
+        <label for="details">Extra Details <span class="opt">(optional)</span></label>
+        <textarea id="details" placeholder="e.g. struggling with team coordination, missed deadlines, tool overload">struggling with team coordination, missed deadlines, tool overload</textarea>
+      </div>
+
+      <span class="source-label">Where should we listen?</span>
+      <div class="source-cards">
+        <label class="src active" data-source="reddit.com">
+          <input type="radio" name="source" value="reddit.com" checked />
+          <span class="badge reddit">R</span>
+          <span class="meta"><b>Reddit</b><small>Threads &amp; communities</small></span>
+        </label>
+        <label class="src" data-source="x.com">
+          <input type="radio" name="source" value="x.com" />
+          <span class="badge x">X</span>
+          <span class="meta"><b>X (Twitter)</b><small>Public posts &amp; replies</small></span>
+        </label>
+      </div>
+
+      <div class="actions">
+        <button class="btn" id="findBtn">
+          <span id="btnText">Find Leads</span>
+        </button>
+      </div>
+
+      <div class="error" id="error" style="display:none"></div>
+    </section>
+
+    <div class="results-head" id="resultsHead" style="display:none">
+      <h3>Leads found</h3>
+      <div class="count" id="resultCount"></div>
+    </div>
+
+    <div class="empty" id="empty" style="display:none">
+      <b>No leads yet</b>
+      Fill in your product details and hit “Find Leads”.
+    </div>
+
+    <div class="cards" id="cards"></div>
+  </div>
+
+  <script>
+    // ---- State persists across source toggles (no re-typing) ----
+    const els = {
+      category: document.getElementById("category"),
+      audience: document.getElementById("audience"),
+      details:  document.getElementById("details"),
+      findBtn:  document.getElementById("findBtn"),
+      btnText:  document.getElementById("btnText"),
+      cards:    document.getElementById("cards"),
+      empty:    document.getElementById("empty"),
+      error:    document.getElementById("error"),
+      head:     document.getElementById("resultsHead"),
+      count:    document.getElementById("resultCount"),
+    };
+
+    // Source selection (toggle cards, single select)
+    document.querySelectorAll(".src").forEach((card) => {
+      card.addEventListener("click", () => {
+        document.querySelectorAll(".src").forEach((c) => c.classList.remove("active"));
+        card.classList.add("active");
+        card.querySelector("input").checked = true;
+      });
+    });
+
+    function getSource() {
+      return document.querySelector('input[name="source"]:checked').value;
+    }
+
+    function escapeHtml(s) {
+      return (s || "").replace(/[&<>"']/g, (c) => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
+      }[c]));
+    }
+
+    // Highlight a few pain-point keywords inside the snippet
+    function highlight(snippet) {
+      const kw = ["problem","struggle","struggling","hate","annoying","frustrat","can't","cant",
+                  "worst","broken","issue","pain","slow","confus","overwhelm","missed","stress"];
+      let html = escapeHtml(snippet);
+      kw.forEach((k) => {
+        const re = new RegExp("(" + k + ")", "gi");
+        html = html.replace(re, "<mark>$1</mark>");
+      });
+      return html;
+    }
+
+    function renderCards(items, source) {
+      els.cards.innerHTML = "";
+      if (!items.length) {
+        els.head.style.display = "none";
+        els.empty.style.display = "block";
+        els.empty.querySelector("b").textContent = "No leads found";
+        els.empty.querySelector("b").nextSibling.textContent =
+          " Try different details or switch the source.";
+        return;
+      }
+      els.empty.style.display = "none";
+      els.head.style.display = "flex";
+      els.count.textContent = items.length + " potential leads";
+
+      const platform = source === "x.com" ? "x" : "reddit";
+      const label = platform === "x" ? "X" : "Reddit";
+
+      items.forEach((it) => {
+        const card = document.createElement("div");
+        card.className = "lead";
+        card.innerHTML = `
+          <div class="top">
+            <span class="tag ${platform}"><span class="dot"></span>${label}</span>
+          </div>
+          <h4>${escapeHtml(it.title)}</h4>
+          <div class="snip">${highlight(it.snippet)}</div>
+          <a class="cta" href="${encodeURI(it.link)}" target="_blank" rel="noopener noreferrer">Outreach to Lead →</a>
+        `;
+        els.cards.appendChild(card);
+      });
+    }
+
+    async function findLeads() {
+      const payload = {
+        category: els.category.value.trim(),
+        audience: els.audience.value.trim(),
+        details:  els.details.value.trim(),
+        source:   getSource(),
+      };
+
+      if (!payload.category || !payload.audience) {
+        els.error.style.display = "block";
+        els.error.textContent = "Please fill in Product Category and Target Audience.";
+        return;
+      }
+
+      // Loading state
+      els.error.style.display = "none";
+      els.findBtn.disabled = true;
+      els.btnText.innerHTML = '<span class="spinner"></span> Searching…';
+
+      try {
+        const res = await fetch("/api/search", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Request failed");
+        renderCards(data.items, data.source);
+      } catch (err) {
+        els.head.style.display = "none";
+        els.cards.innerHTML = "";
+        els.empty.style.display = "none";
+        els.error.style.display = "block";
+        els.error.textContent = "⚠ " + err.message;
+      } finally {
+        els.findBtn.disabled = false;
+        els.btnText.textContent = "Find Leads";
+      }
+    }
+
+    els.findBtn.addEventListener("click", findLeads);
+  </script>
+</body>
+</html>
