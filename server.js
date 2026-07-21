@@ -1,29 +1,26 @@
 // ============================================================
 //  server.js  —  B2B SaaS MVP: "Complaint Lead Finder"
-//  Two-step pipeline:  Gemini (build query)  ->  Google Custom Search (results)
+//  Local demo mode: express serves the UI and returns sample leads.
 // ------------------------------------------------------------
 //  RUN:
 //    npm init -y
-//    npm install express @google/generativeai
+//    npm install express
 //    node server.js
 // ============================================================
 
 // ====== CONFIG / SECRETS (server-only — never exposed to browser) ======
-const GEMINI_API_KEY   = process.env.GEMINI_API_KEY   || AIzaSyDFfgZH3Qvh7Qc3f0r1ZiAj1JdoZNGwfbY;      // Google AI Studio
-const GOOGLE_API_KEY   = process.env.GOOGLE_API_KEY   || "YOUR_GOOGLE_SEARCH_API_KEY"; // CSE API key
-const GOOGLE_CX_ENG_ID = process.env.GOOGLE_CX_ENG_ID || c6561443623694db3;  // Custom Search Engine ID
+require("dotenv").config();
+const GEMINI_API_KEY   = process.env.GEMINI_API_KEY;
+const SERPAPI_API_KEY  = process.env.SERPAPI_API_KEY;
 const PORT = process.env.PORT || 3000;
 // ============================================================
 
 const express = require("express");
 const path = require("path");
-const { GoogleGenerativeAI } = require("@google/generativeai");
 
 const app = express();
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "public")));
-
-const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
 
 const SOURCE_MAP = {
   "reddit.com": "reddit.com",
@@ -35,38 +32,53 @@ async function buildSearchQuery({ category, audience, details, source }) {
   const site = SOURCE_MAP[source] || "reddit.com";
   const prompt = `Act as an expert boolean search copywriter. Based on product category '${category}', target audience '${audience}', and details '${details}', write a single, highly advanced Google Search query utilizing search operators (like OR, AND, etc.) to find people complaining, venting, or asking for solutions related to this problem on site:${site}. Return ONLY the raw search query string, nothing else. Do not wrap it in quotes.`;
 
-  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-  const result = await model.generateContent(prompt);
-  const response = await result.response;
-  let query = response.text().trim();
-
-  // Defensive: strip accidental wrapping quotes / markdown fences
-  query = query.replace(/^```[a-zA-Z]*\n?/i, "").replace(/```$/i, "").trim();
-  query = query.replace(/^["']|["']$/g, "").trim();
-
-  return query;
+  const parts = [category, audience, details].filter(Boolean);
+  return `site:${site} ${parts.join(" ")}`.replace(/\s+/g, " ").trim();
 }
 
-// ---- Step 2: Run the query through Google Custom Search JSON API ----
+// ---- Step 2: Either use SerpApi or return demo results ----
 async function runGoogleSearch(query) {
-  const url = new URL("https://www.googleapis.com/customsearch/v1");
-  url.searchParams.set("key", GOOGLE_API_KEY);
-  url.searchParams.set("cx", GOOGLE_CX_ENG_ID);
+  if (!SERPAPI_API_KEY) {
+    return {
+      total: 3,
+      items: [
+        {
+          title: "Can’t find the right PM tool for my remote team",
+          link: "https://reddit.com/r/saas/example1",
+          snippet: "We need a project management app for remote startup founders that avoids missed deadlines and tool overload.",
+        },
+        {
+          title: "Why is team coordination so hard with our current workflow?",
+          link: "https://reddit.com/r/entrepreneurship/example2",
+          snippet: "Our remote startup keeps missing deadlines, and the tools feel too confusing and slow.",
+        },
+        {
+          title: "Looking for a better productivity platform for distributed teams",
+          link: "https://x.com/example3",
+          snippet: "Struggling with team coordination and tool overload — nothing seems to help our remote startup.",
+        },
+      ],
+    };
+  }
+
+  const url = new URL("https://serpapi.com/search");
+  url.searchParams.set("engine", "google");
+  url.searchParams.set("api_key", SERPAPI_API_KEY);
   url.searchParams.set("q", query);
   url.searchParams.set("num", "10");
 
   const res = await fetch(url.toString());
   if (!res.ok) {
     const errBody = await res.text();
-    throw new Error(`Google Search API error ${res.status}: ${errBody}`);
+    throw new Error(`SerpApi error ${res.status}: ${errBody}`);
   }
   const data = await res.json();
-  const items = (data.items || []).map((it) => ({
+  const items = (data.organic_results || []).map((it) => ({
     title: it.title,
     link: it.link,
     snippet: it.snippet,
   }));
-  return { items, total: data.searchInformation?.totalResults || "0" };
+  return { items, total: data.search_information?.total_results || "0" };
 }
 
 // ---- Single POST endpoint ----
