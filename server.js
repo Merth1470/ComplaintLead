@@ -1,6 +1,6 @@
 // ============================================================
 //  server.js  —  B2B SaaS MVP: "Complaint Lead Finder"
-//  Local demo mode: express serves the UI and returns sample leads.
+//
 // ------------------------------------------------------------
 //  RUN:
 //    npm init -y
@@ -61,24 +61,59 @@ async function runGoogleSearch(query) {
     };
   }
 
-  const url = new URL("https://serpapi.com/search");
-  url.searchParams.set("engine", "google");
-  url.searchParams.set("api_key", SERPAPI_API_KEY);
-  url.searchParams.set("q", query);
-  url.searchParams.set("num", "10");
+  // Fetch 5 pages of 10 results in parallel to guarantee up to 50 results (offsets 0, 10, 20, 30, 40)
+  // as SerpApi limits organic_results count per request on certain plans/caches.
+  const offsets = [0, 10, 20, 30, 40];
+  const fetchPromises = offsets.map(async (start) => {
+    try {
+      const url = new URL("https://serpapi.com/search");
+      url.searchParams.set("engine", "google");
+      url.searchParams.set("api_key", SERPAPI_API_KEY);
+      url.searchParams.set("q", query);
+      url.searchParams.set("num", "10");
+      url.searchParams.set("start", start.toString());
 
-  const res = await fetch(url.toString());
-  if (!res.ok) {
-    const errBody = await res.text();
-    throw new Error(`SerpApi error ${res.status}: ${errBody}`);
+      const res = await fetch(url.toString());
+      if (!res.ok) {
+        console.error(`SerpApi error at start=${start}: status ${res.status}`);
+        return { items: [], total: "0" };
+      }
+      const data = await res.json();
+      const items = (data.organic_results || []).map((it) => ({
+        title: it.title,
+        link: it.link,
+        snippet: it.snippet,
+      }));
+      return { items, total: data.search_information?.total_results || "0" };
+    } catch (err) {
+      console.error(`Fetch error at start=${start}:`, err.message);
+      return { items: [], total: "0" };
+    }
+  });
+
+  const results = await Promise.all(fetchPromises);
+  const allItems = [];
+  let total = "0";
+  for (const res of results) {
+    if (res.items && res.items.length > 0) {
+      allItems.push(...res.items);
+    }
+    if (res.total && res.total !== "0") {
+      total = res.total;
+    }
   }
-  const data = await res.json();
-  const items = (data.organic_results || []).map((it) => ({
-    title: it.title,
-    link: it.link,
-    snippet: it.snippet,
-  }));
-  return { items, total: data.search_information?.total_results || "0" };
+
+  // Remove potential duplicates by link
+  const seen = new Set();
+  const uniqueItems = [];
+  for (const item of allItems) {
+    if (item.link && !seen.has(item.link)) {
+      seen.add(item.link);
+      uniqueItems.push(item);
+    }
+  }
+
+  return { items: uniqueItems.slice(0, 50), total };
 }
 
 // ---- Single POST endpoint ----
