@@ -30,7 +30,47 @@ const SOURCE_MAP = {
 // ---- Step 1: Ask Gemini to turn the brief into an advanced search query ----
 async function buildSearchQuery({ category, audience, details, source }) {
   const site = SOURCE_MAP[source] || "reddit.com";
-  const prompt = `Act as an expert boolean search copywriter. Based on product category '${category}', target audience '${audience}', and details '${details}', write a single, highly advanced Google Search query utilizing search operators (like OR, AND, etc.) to find people complaining, venting, or asking for solutions related to this problem on site:${site}. Return ONLY the raw search query string, nothing else. Do not wrap it in quotes.`;
+  const prompt = `Act as a world-class Boolean Search Architect specializing in B2B Customer Discovery and Lead Generation.
+
+Your ONLY goal is to build a hyper-specific, long-tail Google Search Query that finds REAL PEOPLE complaining, asking for advice, or sharing pain points about a specific problem on social platforms.
+
+Inputs provided by user:
+- Product/Category: ${category}
+- Target Audience: ${audience}
+- Extra Context: ${details}
+- Platform: ${source} (Must be either 'reddit.com' or 'x.com')
+
+### QUERY CONSTRUCTION INSTRUCTIONS:
+
+1. **Targeting Rule:** Start with site:${source}. 
+   - If platform is 'reddit.com', append (inurl:comments OR inurl:thread).
+   - If platform is 'x.com', do not use inurl, instead focus on post content.
+
+2. **Domain/Context Extraction:**
+   Extract 3-5 hyper-specific niche keywords or short phrases from ${category}, ${audience}, and ${details}. 
+   Group them inside quotes with OR operators, e.g., ("first customers" OR "get traction" OR "find users" OR "marketing SaaS").
+
+3. **High-Intent Emotional Triggers (STRICT INCLUSION):**
+   You MUST include a broad set of high-intent "first-person struggle" phrases to filter out blog posts, spam, and SEO articles. Always include a group like this:
+   intext:("my biggest struggle" OR "how do you guys" OR "frustrated with" OR "stuck at" OR "no sales" OR "impossible to" OR "any advice" OR "what worked for you")
+
+4. **Combine for Maximum Specificity:**
+   Assemble the final query using strict AND logic between the domain keywords and the pain-point triggers. Do NOT shorten or simplify the query. Make it as deep and specific as possible to guarantee 100% real human posts.
+
+### OUTPUT FORMAT REQUIREMENTS:
+- Output ONLY the raw finalized search query string.
+- No markdown code blocks, no quotes surrounding the entire string, no intro or outro text.
+
+---
+### EXAMPLE OUTPUT EXPECTATIONS:
+
+If input is: Category = "B2B SaaS", Audience = "Founders struggling to get users", Source = "reddit.com"
+Desired Output:
+site:reddit.com (inurl:comments OR inurl:thread) ("first customers" OR "get users" OR "SaaS marketing" OR "zero traction") intext:("my biggest struggle" OR "how do you guys" OR "frustrated with" OR "stuck at" OR "no sales" OR "what worked for you")
+
+If input is: Category = "AI Video Editor", Audience = "Content Creators", Source = "x.com"
+Desired Output:
+site:x.com ("video editing" OR "editing process" OR "Premiere Pro" OR "CapCut") ("takes too long" OR "looking for an app" OR "hate editing" OR "any tool for" OR "waste of time")`;
 
   const parts = [category, audience, details].filter(Boolean);
   return `site:${site} ${parts.join(" ")}`.replace(/\s+/g, " ").trim();
