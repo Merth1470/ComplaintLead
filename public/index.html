@@ -8,7 +8,55 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital,wght@0,400;1,400&family=JetBrains+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-  
+  <script>
+  !(function (t, e) {
+    var o, n, p, r;
+    e.__SV ||
+      ((window.posthog = e),
+      (e._i = []),
+      (e.init = function (i, s, a) {
+        function g(t, e) {
+          var o = e.split(".");
+          (2 == o.length && ((t = t[o[0]]), (e = o[1])),
+            (t[e] = function () {
+              t.push([e].concat(Array.prototype.slice.call(arguments, 0)));
+            }));
+        }
+        (((p = t.createElement("script")).type = "text/javascript"),
+          (p.crossOrigin = "anonymous"),
+          (p.async = !0),
+          (p.src =
+            s.api_host.replace(".i.posthog.com", "-assets.i.posthog.com") + "/static/array.js"),
+          (r = t.getElementsByTagName("script")[0]).parentNode.insertBefore(p, r));
+        var u = e;
+        for (
+          void 0 !== a ? (u = e[a] = []) : (a = "posthog"),
+            u.people = u.people || [],
+            u.toString = function (t) {
+              var e = "posthog";
+              return ("posthog" !== a && (e += "." + a), t || (e += " (stub)"), e);
+            },
+            u.people.toString = function () {
+              return u.toString(1) + ".people (stub)";
+            },
+            o =
+              "init capture register register_once register_for_session unregister unregister_for_session getFeatureFlag getFeatureFlagResult isFeatureEnabled reloadFeatureFlags updateEarlyAccessFeatureEnrollment getEarlyAccessFeatures on onFeatureFlags onSessionId getSurveys getActiveMatchingSurveys renderSurvey canRenderSurvey getNextSurveyStep identify setPersonProperties group resetGroups setPersonPropertiesForFlags resetPersonPropertiesForFlags setGroupPropertiesForFlags resetGroupPropertiesForFlags reset get_distinct_id getGroups get_session_id get_session_replay_url alias set_config startSessionRecording stopSessionRecording sessionRecordingStarted captureException loadToolbar get_property getSessionProperty createPersonProfile opt_in_capturing opt_out_capturing has_opted_in_capturing has_opted_out_capturing clear_opt_in_out_capturing debug".split(
+                " ",
+              ),
+            n = 0;
+          n < o.length;
+          n++
+        )
+          g(u, o[n]);
+        e._i.push([i, s, a]);
+      }),
+      (e.__SV = 1));
+  })(document, window.posthog || []);
+  posthog.init("phc_CjUy37LcDBZyGQ4kxFNjNg29cv988f8UQ8jBVZbUKw8i", {
+    api_host: "https://us.i.posthog.com",
+    defaults: "2026-05-30",
+  });
+</script>
   <style>
     :root {
       --bg: #FBFBF9;          /* Warm Cream / Off-White */
@@ -503,6 +551,60 @@
       }
     }
   </style>
+
+  <script>
+    !(function (t, e) {
+      var o, n, p, r;
+      e.__SV ||
+        ((window.posthog = e),
+        (e._i = []),
+        (e.init = function (i, s, a) {
+          function g(t, e) {
+            var o = e.split(".");
+            2 == o.length && ((t = t[o[0]]), (e = o[1]));
+            t[e] = function () {
+              t.push([e].concat(Array.prototype.slice.call(arguments, 0)));
+            };
+          }
+          (p = t.createElement("script")).type = "text/javascript";
+          p.crossOrigin = "anonymous";
+          p.async = !0;
+          p.src = s.api_host.replace(".i.posthog.com", "-assets.i.posthog.com") + "/static/array.js";
+          (r = t.getElementsByTagName("script")[0]).parentNode.insertBefore(p, r);
+          var u = e;
+          void 0 !== a ? (u = e[a] = []) : (a = "posthog");
+          u.people = u.people || [];
+          u.toString = function (t) {
+            var e = "posthog";
+            "posthog" !== a && (e += "." + a);
+            t || (e += " (stub)");
+            return e;
+          };
+          u.people.toString = function () { return u.toString(1) + ".people (stub)"; };
+          o = "init capture register register_once register_for_session unregister unregister_for_session getFeatureFlag getFeatureFlagResult isFeatureEnabled reloadFeatureFlags updateEarlyAccessFeatureEnrollment getEarlyAccessFeatures on onFeatureFlags onSessionId getSurveys getActiveMatchingSurveys renderSurvey canRenderSurvey getNextSurveyStep identify setPersonProperties group resetGroups setPersonPropertiesForFlags resetPersonPropertiesForFlags setGroupPropertiesForFlags resetGroupPropertiesForFlags reset get_distinct_id getGroups get_session_id get_session_replay_url alias set_config startSessionRecording stopSessionRecording sessionRecordingStarted captureException loadToolbar get_property getSessionProperty createPersonProfile opt_in_capturing opt_out_capturing has_opted_in_capturing has_opted_out_capturing clear_opt_in_out_capturing debug".split(" ");
+          for (n = 0; n < o.length; n++) g(u, o[n]);
+          e._i.push([i, s, a]);
+        }),
+        (e.__SV = 1));
+    })(document, window.posthog || []);
+    (function () {
+      var cfg = window.__POSTHOG_CONFIG__;
+      if (!cfg || !cfg.key) {
+        if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
+          console.error(
+            "POSTHOG_PUBLIC_KEY variable required by PostHog is missing or un-configured, " +
+            "this causes events to be silently missed. " +
+            "This error stops appearing once POSTHOG_PUBLIC_KEY is configured"
+          );
+        }
+        return;
+      }
+      posthog.init(cfg.key, {
+        api_host: cfg.host,
+        defaults: "2026-05-30",
+      });
+    })();
+  </script>
 </head>
 <body>
   <div class="wrap">
@@ -596,6 +698,7 @@
         document.querySelectorAll(".src").forEach((c) => c.classList.remove("active"));
         card.classList.add("active");
         card.querySelector("input").checked = true;
+        if (window.posthog) posthog.capture("source_selected", { source: card.dataset.source });
       });
     });
 
@@ -629,6 +732,7 @@
         els.empty.querySelector("b").textContent = "No leads found";
         els.empty.querySelector("b").nextSibling.textContent =
           " Try different details or switch the source.";
+        if (window.posthog) posthog.capture("no_leads_found", { source: source });
         return;
       }
       els.empty.style.display = "none";
@@ -655,6 +759,10 @@
           <a class="cta" href="${encodeURI(it.link)}" target="_blank" rel="noopener noreferrer">Outreach to Lead →</a>
         `;
         els.cards.appendChild(card);
+        const leadIndex = index + 1;
+        card.querySelector(".cta").addEventListener("click", () => {
+          if (window.posthog) posthog.capture("lead_link_clicked", { source: platform, lead_index: leadIndex });
+        });
       });
     }
 
@@ -669,8 +777,11 @@
       if (!payload.category || !payload.audience) {
         els.error.style.display = "block";
         els.error.textContent = "Please fill in Product Category and Target Audience.";
+        if (window.posthog) posthog.capture("scan_validation_failed", { missing_category: !payload.category, missing_audience: !payload.audience });
         return;
       }
+
+      if (window.posthog) posthog.capture("search_submitted", { source: payload.source, has_details: Boolean(payload.details) });
 
       // Loading state
       els.error.style.display = "none";
@@ -678,20 +789,30 @@
       els.btnText.innerHTML = '<span class="spinner"></span> scanning...';
 
       try {
+        const headers = { "Content-Type": "application/json" };
+        if (window.posthog && window.__POSTHOG_CONFIG__) {
+          headers["X-PostHog-Distinct-ID"] = posthog.get_distinct_id();
+          headers["X-PostHog-Session-ID"] = posthog.get_session_id();
+        }
         const res = await fetch("/api/search", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers,
           body: JSON.stringify(payload),
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || "Request failed");
         renderCards(data.items, data.source);
+        if (window.posthog) posthog.capture("search_completed", { source: data.source, result_count: data.items.length, has_results: data.items.length > 0 });
       } catch (err) {
         els.head.style.display = "none";
         els.cards.innerHTML = "";
         els.empty.style.display = "none";
         els.error.style.display = "block";
         els.error.textContent = "⚠ " + err.message;
+        if (window.posthog) {
+          posthog.capture("search_failed", { source: payload.source });
+          posthog.captureException(err);
+        }
       } finally {
         els.findBtn.disabled = false;
         els.btnText.textContent = "run scan";

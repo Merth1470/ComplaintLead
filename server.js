@@ -13,13 +13,45 @@ require("dotenv").config();
 const GEMINI_API_KEY   = process.env.GEMINI_API_KEY;
 const SERPAPI_API_KEY  = process.env.SERPAPI_API_KEY;
 const PORT = process.env.PORT || 3000;
+const POSTHOG_KEY  = process.env.POSTHOG_PUBLIC_KEY;
+const POSTHOG_HOST = process.env.POSTHOG_HOST;
 // ============================================================
 
 const express = require("express");
 const path = require("path");
+const fs = require("fs");
+const { PostHog } = require("posthog-node");
+
+const posthog = POSTHOG_KEY && POSTHOG_HOST
+  ? new PostHog(POSTHOG_KEY, {
+      host: POSTHOG_HOST,
+      flushAt: 1,
+      flushInterval: 0,
+      enableExceptionAutocapture: true,
+    })
+  : null;
+
+if (!posthog && process.env.NODE_ENV !== "production") {
+  console.error(
+    "POSTHOG_PUBLIC_KEY and POSTHOG_HOST variables required by PostHog are missing or un-configured, " +
+    "this causes events to be silently missed. " +
+    "This error stops appearing once POSTHOG_PUBLIC_KEY and POSTHOG_HOST are configured"
+  );
+}
 
 const app = express();
 app.use(express.json());
+
+app.get("/", (req, res) => {
+  const html = fs.readFileSync(path.join(__dirname, "public", "index.html"), "utf8");
+  const config = JSON.stringify(
+    POSTHOG_KEY && POSTHOG_HOST ? { key: POSTHOG_KEY, host: POSTHOG_HOST } : null
+  );
+  const injected = html.replace("<head>", `<head>\n  <script>window.__POSTHOG_CONFIG__=${config};</script>`);
+  res.setHeader("Content-Type", "text/html");
+  res.send(injected);
+});
+
 app.use(express.static(path.join(__dirname, "public")));
 
 const SOURCE_MAP = {
@@ -174,14 +206,45 @@ app.post("/api/search", async (req, res) => {
 
     const query = await buildSearchQuery({ category, audience, details, source });
     const { items, total } = await runGoogleSearch(query);
+    const distinctId = req.get("x-posthog-distinct-id");
+
+    if (posthog && distinctId) {
+      posthog.capture({
+        distinctId,
+        event: "search_processed",
+        properties: {
+          source,
+          result_count: items.length,
+          has_results: items.length > 0,
+          used_demo_results: !SERPAPI_API_KEY,
+        },
+      });
+      await posthog.flush();
+    }
 
     res.json({ query, source, total, items });
   } catch (err) {
     console.error("[/api/search] error:", err.message);
+    const distinctId = req.get("x-posthog-distinct-id");
+    if (posthog && distinctId) {
+      posthog.captureException(err, distinctId, {
+        endpoint: "/api/search",
+        method: "POST",
+      });
+      await posthog.flush();
+    }
     res.status(500).json({ error: err.message || "Internal server error." });
   }
 });
 
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log(`\n  Complaint Lead Finder running at http://localhost:${PORT}\n`);
 });
+
+async function shutdown() {
+  if (posthog) await posthog.shutdown();
+  server.close(() => process.exit(0));
+}
+
+process.on("SIGINT", shutdown);
+process.on("SIGTERM", shutdown);
