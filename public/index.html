@@ -542,6 +542,40 @@
       font-size: 13px;
     }
 
+    /* Founder Section */
+    .founder-section {
+      margin-top: 48px;
+      padding-top: 24px;
+      border-top: 2px solid var(--text);
+    }
+
+    .founder-section h3 {
+      font-family: "Instrument Serif", serif;
+      font-size: 28px;
+      font-weight: 400;
+      margin-bottom: 12px;
+    }
+
+    .founder-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      align-items: center;
+    }
+
+    .founder-links a {
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 14px;
+      transition: color 0.15s ease;
+    }
+
+    .founder-links a:hover {
+      color: var(--accent-hover);
+      text-decoration: underline;
+    }
+
     @media(max-width: 720px) {
       .grid, .source-cards, .cards {
         grid-template-columns: 1fr;
@@ -675,6 +709,15 @@
     </div>
 
     <div class="cards" id="cards"></div>
+
+    <section class="founder-section">
+      <h3>The Founder</h3>
+      <div class="founder-links">
+        <a href="https://x.com/MertHemedan" target="_blank" rel="noopener noreferrer">X (Twitter)</a>
+        <a href="https://www.linkedin.com/in/mert-hemedan-1a0411418/" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+        <a href="https://join.slack.com/t/complaintlead/shared_invite/zt-44qv3ve39-OCSe6X0Rhj9CBcE_WdGX1g" target="_blank" rel="noopener noreferrer">join our slack community</a>
+      </div>
+    </section>
   </div>
 
   <script>
