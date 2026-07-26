@@ -194,11 +194,17 @@
       display: flex;
       flex-direction: column;
       gap: 8px;
-      margin-bottom: 20px;
+      margin-bottom: 24px;
     }
 
     .field.full {
       grid-column: 1 / -1;
+    }
+
+    .helper-text {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: -2px;
     }
 
     label {
@@ -232,6 +238,110 @@
     input:focus, textarea:focus {
       border-color: var(--border-dark);
       background-color: var(--panel);
+    }
+
+    /* Tag / Chip Input Container */
+    .tag-input-container {
+      background: var(--panel-2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 8px 10px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      min-height: 48px;
+      transition: border-color 0.15s ease, background-color 0.15s ease;
+    }
+
+    .tag-input-container:focus-within {
+      border-color: var(--border-dark);
+      background-color: var(--panel);
+    }
+
+    .tag-input-container input {
+      border: none;
+      background: transparent;
+      padding: 4px 6px;
+      flex: 1;
+      min-width: 140px;
+      font-size: 14px;
+    }
+
+    .tag-input-container input:focus {
+      border: none;
+      background: transparent;
+    }
+
+    /* Interactive Chip Tags */
+    .chip {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text);
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      padding: 4px 8px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      user-select: none;
+    }
+
+    .chip .remove-btn {
+      cursor: pointer;
+      font-size: 14px;
+      line-height: 1;
+      color: var(--muted);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: none;
+      background: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .chip .remove-btn:hover {
+      color: var(--accent);
+    }
+
+    /* Preset Chips / Toggles */
+    .preset-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .preset-chip {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--muted);
+      background: var(--panel-2);
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      padding: 6px 12px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      user-select: none;
+    }
+
+    .preset-chip:hover {
+      border-color: var(--border-dark);
+      color: var(--text);
+    }
+
+    .preset-chip.active {
+      background: rgba(194, 65, 12, 0.08);
+      border-color: var(--accent);
+      color: var(--accent);
+      font-weight: 700;
     }
 
     textarea {
@@ -659,23 +769,52 @@
     </section>
 
     <section class="card">
+      <!-- SECTION A: Core Targets (Two-Column Layout) -->
       <div class="grid">
         <div class="field">
-          <label for="category">Product Category / Industry</label>
-          <input id="category" type="text" placeholder="e.g. Project management SaaS" value="Productivity SaaS" />
+          <label for="category">PRODUCT CATEGORY / INDUSTRY</label>
+          <input id="category" type="text" placeholder="e.g., Productivity SaaS, Invoicing Software" value="Productivity SaaS" />
         </div>
         <div class="field">
-          <label for="audience">Target Audience</label>
-          <input id="audience" type="text" placeholder="e.g. Remote startup founders" value="Remote startup founders" />
+          <label for="audience">TARGET AUDIENCE</label>
+          <input id="audience" type="text" placeholder="e.g., Remote startup founders, Freelance designers" value="Remote startup founders" />
         </div>
+      </div>
+
+      <!-- SECTION B: Intercept Parameters -->
+      <div class="field full">
+        <label>COMPETITORS & ALTERNATIVES TO MONITOR</label>
+        <div class="tag-input-container" id="competitorsContainer">
+          <input id="competitorsInput" type="text" placeholder="Type a tool name and press Enter..." />
+        </div>
+        <span class="helper-text">Find posts where users complain about these specific tools.</span>
       </div>
 
       <div class="field full">
-        <label for="details">Extra Details <span class="opt">(optional)</span></label>
-        <textarea id="details" placeholder="e.g. struggling with team coordination, missed deadlines, tool overload">struggling with team coordination, missed deadlines, tool overload</textarea>
+        <label>PAIN POINT & INTENT TRIGGERS</label>
+        <div class="preset-container" id="painPresets">
+          <button type="button" class="preset-chip" data-value="Tool Overload">[ ] Tool Overload</button>
+          <button type="button" class="preset-chip" data-value="Missed Deadlines">[ ] Missed Deadlines</button>
+          <button type="button" class="preset-chip" data-value="Steep Learning Curve">[ ] Steep Learning Curve</button>
+          <button type="button" class="preset-chip" data-value="Overpriced / Price Hikes">[ ] Overpriced / Price Hikes</button>
+          <button type="button" class="preset-chip" data-value="Slow Support">[ ] Slow Support</button>
+        </div>
+        <div class="tag-input-container" id="painCustomContainer">
+          <input id="painCustomInput" type="text" placeholder="Add custom pain point and press Enter..." />
+        </div>
       </div>
 
-      <span class="source-label">Where should we listen?</span>
+      <!-- SECTION C: Noise Reduction & Target Filters -->
+      <div class="field full">
+        <label>EXCLUDE KEYWORDS</label>
+        <div class="tag-input-container" id="excludeContainer">
+          <input id="excludeInput" type="text" placeholder="Add keyword to exclude and press Enter..." />
+        </div>
+        <span class="helper-text">Filter out unwanted keywords.</span>
+      </div>
+
+      <!-- SECTION D: Listening Platform Selection & CTA Button -->
+      <span class="source-label">Where Should We Scan?</span>
       <div class="source-cards">
         <label class="src active" data-source="reddit.com">
           <input type="radio" name="source" value="reddit.com" checked />
@@ -721,11 +860,10 @@
   </div>
 
   <script>
-    // ---- State persists across source toggles (no re-typing) ----
+    // ---- State & Elements ----
     const els = {
       category: document.getElementById("category"),
       audience: document.getElementById("audience"),
-      details:  document.getElementById("details"),
       findBtn:  document.getElementById("findBtn"),
       btnText:  document.getElementById("btnText"),
       cards:    document.getElementById("cards"),
@@ -734,6 +872,95 @@
       head:     document.getElementById("resultsHead"),
       count:    document.getElementById("resultCount"),
     };
+
+    // Chip Tag State Management
+    const state = {
+      competitors: ["Jira", "ClickUp", "Monday.com"],
+      selectedPresets: new Set(["Tool Overload", "Missed Deadlines"]),
+      customPainPoints: [],
+      excludeKeywords: ["hiring", "job", "course", "affiliate", "agency"]
+    };
+
+    // --- Helper function to create interactive chip ---
+    function createChipElement(text, onRemove) {
+      const chip = document.createElement("span");
+      chip.className = "chip";
+      chip.textContent = text + " ";
+      const removeBtn = document.createElement("button");
+      removeBtn.type = "button";
+      removeBtn.className = "remove-btn";
+      removeBtn.innerHTML = "&times;";
+      removeBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        onRemove();
+      });
+      chip.appendChild(removeBtn);
+      return chip;
+    }
+
+    // --- Setup Tag Input Field ---
+    function setupTagInput(containerId, inputId, stateArray, renderFn) {
+      const container = document.getElementById(containerId);
+      const input = document.getElementById(inputId);
+
+      function render() {
+        // Remove existing chips
+        container.querySelectorAll(".chip").forEach(c => c.remove());
+        // Insert new chips before input
+        stateArray.forEach((item, index) => {
+          const chip = createChipElement(item, () => {
+            stateArray.splice(index, 1);
+            render();
+          });
+          container.insertBefore(chip, input);
+        });
+      }
+
+      input.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === ",") {
+          e.preventDefault();
+          const val = input.value.trim().replace(/^,/, "");
+          if (val && !stateArray.includes(val)) {
+            stateArray.push(val);
+            input.value = "";
+            render();
+          }
+        } else if (e.key === "Backspace" && !input.value && stateArray.length > 0) {
+          stateArray.pop();
+          render();
+        }
+      });
+
+      render();
+    }
+
+    // Initialize Tag Inputs
+    setupTagInput("competitorsContainer", "competitorsInput", state.competitors);
+    setupTagInput("painCustomContainer", "painCustomInput", state.customPainPoints);
+    setupTagInput("excludeContainer", "excludeInput", state.excludeKeywords);
+
+    // Initialize Preset Toggles
+    document.querySelectorAll("#painPresets .preset-chip").forEach((btn) => {
+      const val = btn.dataset.value;
+      if (state.selectedPresets.has(val)) {
+        btn.classList.add("active");
+        btn.textContent = "[x] " + val;
+      } else {
+        btn.textContent = "[ ] " + val;
+      }
+
+      btn.addEventListener("click", () => {
+        if (state.selectedPresets.has(val)) {
+          state.selectedPresets.delete(val);
+          btn.classList.remove("active");
+          btn.textContent = "[ ] " + val;
+        } else {
+          state.selectedPresets.add(val);
+          btn.classList.add("active");
+          btn.textContent = "[x] " + val;
+        }
+      });
+    });
 
     // Source selection (toggle cards, single select)
     document.querySelectorAll(".src").forEach((card) => {
@@ -751,7 +978,7 @@
 
     function escapeHtml(s) {
       return (s || "").replace(/[&<>"']/g, (c) => ({
-        "\x26": "\x26amp;", "\x3c": "\x26lt;", "\x3e": "\x26gt;", '"': "\x26quot;", "'": "\x26#39;",
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
       }[c]));
     }
 
@@ -774,7 +1001,7 @@
         els.empty.style.display = "block";
         els.empty.querySelector("b").textContent = "No leads found";
         els.empty.querySelector("b").nextSibling.textContent =
-          " Try different details or switch the source.";
+          " Try adjusting your target parameters or switch the source.";
         if (window.posthog) posthog.capture("no_leads_found", { source: source });
         return;
       }
@@ -810,11 +1037,16 @@
     }
 
     async function findLeads() {
+      // Combine pain point presets + custom tags
+      const allPainPoints = [...Array.from(state.selectedPresets), ...state.customPainPoints];
+
       const payload = {
         category: els.category.value.trim(),
         audience: els.audience.value.trim(),
-        details:  els.details.value.trim(),
-        source:   getSource(),
+        competitors: state.competitors,
+        painPoints: allPainPoints,
+        excludeKeywords: state.excludeKeywords,
+        source: getSource(),
       };
 
       if (!payload.category || !payload.audience) {
@@ -824,7 +1056,7 @@
         return;
       }
 
-      if (window.posthog) posthog.capture("search_submitted", { source: payload.source, has_details: Boolean(payload.details) });
+      if (window.posthog) posthog.capture("search_submitted", { source: payload.source, competitors_count: payload.competitors.length });
 
       // Loading state
       els.error.style.display = "none";

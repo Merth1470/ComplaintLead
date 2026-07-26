@@ -60,8 +60,14 @@ const SOURCE_MAP = {
 };
 
 // ---- Step 1: Ask Gemini to turn the brief into an advanced search query ----
-async function buildSearchQuery({ category, audience, details, source }) {
+async function buildSearchQuery({ category, audience, details, competitors, painPoints, excludeKeywords, source }) {
   const site = SOURCE_MAP[source] || "reddit.com";
+  
+  // Format arrays into strings for Gemini prompt / query construction
+  const competitorsList = Array.isArray(competitors) ? competitors.join(", ") : (competitors || "");
+  const painPointsList = Array.isArray(painPoints) ? painPoints.join(", ") : (painPoints || "");
+  const excludeKeywordsList = Array.isArray(excludeKeywords) ? excludeKeywords.join(", ") : (excludeKeywords || "");
+  
   const prompt = `Act as a world-class Boolean Search Architect specializing in B2B Customer Discovery and Lead Generation.
 
 Your ONLY goal is to build a hyper-specific, long-tail Google Search Query that finds REAL PEOPLE complaining, asking for advice, or sharing pain points about a specific problem on social platforms.
@@ -69,7 +75,10 @@ Your ONLY goal is to build a hyper-specific, long-tail Google Search Query that 
 Inputs provided by user:
 - Product/Category: ${category}
 - Target Audience: ${audience}
-- Extra Context: ${details}
+- Competitors & Alternatives to Monitor: ${competitorsList}
+- Pain Point & Intent Triggers: ${painPointsList}
+- Exclude Keywords: ${excludeKeywordsList}
+- Extra Context: ${details || ""}
 - Platform: ${source} (Must be either 'reddit.com' or 'x.com')
 
 ### QUERY CONSTRUCTION INSTRUCTIONS:
@@ -79,33 +88,33 @@ Inputs provided by user:
    - If platform is 'x.com', do not use inurl, instead focus on post content.
 
 2. **Domain/Context Extraction:**
-   Extract 3-5 hyper-specific niche keywords or short phrases from ${category}, ${audience}, and ${details}. 
-   Group them inside quotes with OR operators, e.g., ("first customers" OR "get traction" OR "find users" OR "marketing SaaS").
+   Extract hyper-specific niche keywords, competitors, or short phrases from ${category}, ${audience}, ${competitorsList}, and ${painPointsList}. 
+   Group them inside quotes with OR operators, e.g., ("Jira" OR "ClickUp" OR "Monday.com" OR "Productivity SaaS").
 
 3. **High-Intent Emotional Triggers (STRICT INCLUSION):**
    You MUST include a broad set of high-intent "first-person struggle" phrases to filter out blog posts, spam, and SEO articles. Always include a group like this:
    intext:("my biggest struggle" OR "how do you guys" OR "frustrated with" OR "stuck at" OR "no sales" OR "impossible to" OR "any advice" OR "what worked for you")
 
-4. **Combine for Maximum Specificity:**
+4. **Negative Filtering:**
+   If exclude keywords are provided (${excludeKeywordsList}), append negative search operators like -hiring -job -course -affiliate -agency.
+
+5. **Combine for Maximum Specificity:**
    Assemble the final query using strict AND logic between the domain keywords and the pain-point triggers. Do NOT shorten or simplify the query. Make it as deep and specific as possible to guarantee 100% real human posts.
 
 ### OUTPUT FORMAT REQUIREMENTS:
 - Output ONLY the raw finalized search query string.
-- No markdown code blocks, no quotes surrounding the entire string, no intro or outro text.
+- No markdown code blocks, no quotes surrounding the entire string, no intro or outro text.`;
 
----
-### EXAMPLE OUTPUT EXPECTATIONS:
+  const compText = Array.isArray(competitors) && competitors.length ? competitors.join(" ") : "";
+  const painText = Array.isArray(painPoints) && painPoints.length ? painPoints.join(" ") : "";
+  const excludeText = Array.isArray(excludeKeywords) && excludeKeywords.length ? excludeKeywords.map(k => `-${k.replace(/^-/, '')}`).join(" ") : "";
 
-If input is: Category = "B2B SaaS", Audience = "Founders struggling to get users", Source = "reddit.com"
-Desired Output:
-site:reddit.com (inurl:comments OR inurl:thread) ("first customers" OR "get users" OR "SaaS marketing" OR "zero traction") intext:("my biggest struggle" OR "how do you guys" OR "frustrated with" OR "stuck at" OR "no sales" OR "what worked for you")
-
-If input is: Category = "AI Video Editor", Audience = "Content Creators", Source = "x.com"
-Desired Output:
-site:x.com ("video editing" OR "editing process" OR "Premiere Pro" OR "CapCut") ("takes too long" OR "looking for an app" OR "hate editing" OR "any tool for" OR "waste of time")`;
-
-  const parts = [category, audience, details].filter(Boolean);
-  return `site:${site} ${parts.join(" ")}`.replace(/\s+/g, " ").trim();
+  const parts = [category, audience, compText, painText, details].filter(Boolean);
+  let query = `site:${site} ${parts.join(" ")}`;
+  if (excludeText) {
+    query += ` ${excludeText}`;
+  }
+  return query.replace(/\s+/g, " ").trim();
 }
 
 // ---- Step 2: Either use SerpApi or return demo results ----
@@ -191,7 +200,7 @@ async function runGoogleSearch(query) {
 // ---- Single POST endpoint ----
 app.post("/api/search", async (req, res) => {
   try {
-    const { category, audience, details, source } = req.body || {};
+    const { category, audience, details, competitors, painPoints, excludeKeywords, source } = req.body || {};
 
     if (!category || !audience || !source) {
       return res
@@ -204,7 +213,7 @@ app.post("/api/search", async (req, res) => {
         .json({ error: "source must be 'reddit.com' or 'x.com'." });
     }
 
-    const query = await buildSearchQuery({ category, audience, details, source });
+    const query = await buildSearchQuery({ category, audience, details, competitors, painPoints, excludeKeywords, source });
     const { items, total } = await runGoogleSearch(query);
     const distinctId = req.get("x-posthog-distinct-id");
 
