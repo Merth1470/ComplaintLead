@@ -699,6 +699,54 @@
       text-decoration: underline;
     }
 
+    /* Waitlist CTA Banner */
+    .waitlist-banner {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 36px;
+      padding: 24px 20px;
+      background: linear-gradient(135deg, rgba(194, 65, 12, 0.06) 0%, rgba(194, 65, 12, 0.02) 100%);
+      border: 1px solid rgba(194, 65, 12, 0.2);
+      border-radius: var(--radius);
+    }
+
+    .waitlist-btn {
+      background-color: var(--accent);
+      color: #FFFFFF;
+      border: none;
+      border-radius: var(--radius);
+      padding: 14px 32px;
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: background-color 0.15s ease, transform 0.1s ease;
+      box-shadow: 0 2px 8px rgba(194, 65, 12, 0.25);
+    }
+
+    .waitlist-btn:hover {
+      background-color: var(--accent-hover);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(194, 65, 12, 0.35);
+    }
+
+    .waitlist-text {
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-size: 13px;
+      color: var(--muted);
+      text-align: center;
+      margin: 0;
+      line-height: 1.5;
+    }
+
     @media(max-width: 720px) {
       .grid, .source-cards, .cards {
         grid-template-columns: 1fr;
@@ -775,6 +823,11 @@
       </div>
       <div class="pill">MVP Demo</div>
     </header>
+
+    <div class="waitlist-banner">
+      <a href="https://forms.queueform.com/426" target="_blank" rel="noopener noreferrer" class="waitlist-btn">Join Waitlist</a>
+      <p class="waitlist-text">Be the one to first know when we launch!</p>
+    </div>
 
     <section class="hero">
       <h2>Turn online <em>complaints</em> into warm leads.</h2>
