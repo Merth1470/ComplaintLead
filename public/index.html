@@ -107,17 +107,11 @@
       gap: 16px;
     }
 
-    .logo {
+    .brand .logo-img {
       width: 44px;
       height: 44px;
       border-radius: var(--radius);
-      background-color: var(--text);
-      color: var(--bg);
-      display: grid;
-      place-items: center;
-      font-family: "JetBrains Mono", monospace;
-      font-weight: 700;
-      font-size: 18px;
+      object-fit: contain;
       border: 1px solid var(--border);
     }
 
@@ -394,12 +388,16 @@
       width: 32px;
       height: 32px;
       border-radius: var(--radius);
-      display: grid;
-      place-items: center;
-      font-family: "JetBrains Mono", monospace;
-      font-weight: 700;
-      font-size: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       flex-shrink: 0;
+    }
+
+    .src .badge img, .src .badge svg {
+      width: 20px;
+      height: 20px;
+      object-fit: contain;
     }
 
     .src .badge.reddit {
@@ -679,6 +677,21 @@
       font-weight: 600;
       font-size: 14px;
       transition: color 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .founder-icon {
+      width: 18px;
+      height: 18px;
+      object-fit: contain;
+      vertical-align: middle;
+    }
+
+    .founder-icon.slack-icon {
+      height: 22px;
+      width: auto;
     }
 
     .founder-links a:hover {
@@ -754,7 +767,7 @@
   <div class="wrap">
     <header>
       <div class="brand">
-        <div class="logo">CL</div>
+        <img class="logo-img" src="/logo.svg" alt="ComplaintLead logo" />
         <div>
           <h1>ComplaintLead</h1>
           <span>Find customers who are already complaining</span>
@@ -818,12 +831,16 @@
       <div class="source-cards">
         <label class="src active" data-source="reddit.com">
           <input type="radio" name="source" value="reddit.com" checked />
-          <span class="badge reddit">R</span>
+          <span class="badge reddit">
+            <img src="/Reddit_Icon_2Color.svg" alt="Reddit" />
+          </span>
           <span class="meta"><b>Reddit</b><small>Threads & communities</small></span>
         </label>
         <label class="src" data-source="x.com">
           <input type="radio" name="source" value="x.com" />
-          <span class="badge x">X</span>
+          <span class="badge x">
+            <img src="/x-logo/logo-black.png" alt="X" />
+          </span>
           <span class="meta"><b>X (Twitter)</b><small>Public posts & replies</small></span>
         </label>
       </div>
@@ -852,9 +869,9 @@
     <section class="founder-section">
       <h3>The Founder</h3>
       <div class="founder-links">
-        <a href="https://x.com/MertHemedan" target="_blank" rel="noopener noreferrer">X (Twitter)</a>
-        <a href="https://www.linkedin.com/in/mert-hemedan-1a0411418/" target="_blank" rel="noopener noreferrer">LinkedIn</a>
-        <a href="https://join.slack.com/t/complaintlead/shared_invite/zt-44qv3ve39-OCSe6X0Rhj9CBcE_WdGX1g" target="_blank" rel="noopener noreferrer">join our slack community</a>
+        <a href="https://x.com/MertHemedan" target="_blank" rel="noopener noreferrer"><img src="/x-logo/logo.svg" class="founder-icon" alt="X" />X (Twitter)</a>
+        <a href="https://www.linkedin.com/in/mert-hemedan-1a0411418/" target="_blank" rel="noopener noreferrer"><img src="/InBug-Black.png" class="founder-icon" alt="LinkedIn" />LinkedIn</a>
+        <a href="https://join.slack.com/t/complaintlead/shared_invite/zt-44qv3ve39-OCSe6X0Rhj9CBcE_WdGX1g" target="_blank" rel="noopener noreferrer"><img src="/SLA-Slack-From-Salesforce-Logo-BLACK.png" class="founder-icon slack-icon" alt="Slack" />join our slack community</a>
       </div>
     </section>
   </div>

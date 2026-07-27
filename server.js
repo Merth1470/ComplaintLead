@@ -53,6 +53,7 @@ app.get("/", (req, res) => {
 });
 
 app.use(express.static(path.join(__dirname, "public")));
+app.use(express.static(__dirname));
 
 const SOURCE_MAP = {
   "reddit.com": "reddit.com",
@@ -96,7 +97,7 @@ Inputs provided by user:
    intext:("my biggest struggle" OR "how do you guys" OR "frustrated with" OR "stuck at" OR "no sales" OR "impossible to" OR "any advice" OR "what worked for you")
 
 4. **Negative Filtering:**
-   If exclude keywords are provided (${excludeKeywordsList}), append negative search operators like -hiring -job -course -affiliate -agency.
+   If exclude keywords are provided (${excludeKeywordsList}), append negative search operators by putting like -hiring -job -course -affiliate -agency.
 
 5. **Combine for Maximum Specificity:**
    Assemble the final query using strict AND logic between the domain keywords and the pain-point triggers. Do NOT shorten or simplify the query. Make it as deep and specific as possible to guarantee 100% real human posts.
@@ -115,6 +116,7 @@ Inputs provided by user:
     query += ` ${excludeText}`;
   }
   return query.replace(/\s+/g, " ").trim();
+  console.log(query)
 }
 
 // ---- Step 2: Either use SerpApi or return demo results ----
