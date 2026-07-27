@@ -116,7 +116,6 @@ Inputs provided by user:
     query += ` ${excludeText}`;
   }
   return query.replace(/\s+/g, " ").trim();
-  console.log(query)
 }
 
 // ---- Step 2: Either use SerpApi or return demo results ----
