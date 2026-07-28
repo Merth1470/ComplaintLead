@@ -825,7 +825,6 @@
     </header>
 
     <div class="waitlist-banner">
-      <a href="https://forms.queueform.com/426" target="_blank" rel="noopener noreferrer" class="waitlist-btn">Join Waitlist</a>
       <p class="waitlist-text">Be the one to first know when we launch!</p>
     </div>
 
@@ -1165,6 +1164,13 @@
     }
 
     els.findBtn.addEventListener("click", findLeads);
+  </script>
+  <script src="https://app.queueform.com/seed/seed-widget.umd.js"></script>
+  <script>
+    new FormWidget({
+      formUrl: "https://forms.queueform.com/426",
+      position: "bottom-right"
+    });
   </script>
 </body>
 </html>
