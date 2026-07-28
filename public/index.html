@@ -216,7 +216,7 @@
       text-transform: lowercase;
     }
 
-    input, textarea {
+    input, textarea, select {
       background: var(--panel-2);
       border: 1px solid var(--border);
       border-radius: var(--radius);
@@ -229,7 +229,7 @@
       transition: border-color 0.15s ease, background-color 0.15s ease;
     }
 
-    input:focus, textarea:focus {
+    input:focus, textarea:focus, select:focus {
       border-color: var(--border-dark);
       background-color: var(--panel);
     }
@@ -878,6 +878,40 @@
         <span class="helper-text">Filter out unwanted keywords.</span>
       </div>
 
+      <!-- SECTION E: Search Filters -->
+      <div class="field full">
+        <label>SEARCH FILTERS</label>
+        <div class="grid">
+          <div class="field">
+            <label for="dateFilter">DATE RANGE</label>
+            <select id="dateFilter">
+              <option value="">Any time</option>
+              <option value="d">Past 24 hours</option>
+              <option value="w">Past week</option>
+              <option value="m">Past month</option>
+              <option value="y">Past year</option>
+              <option value="custom">Custom range</option>
+            </select>
+            <div id="customDateRange" style="display:none; gap:8px; margin-top:8px;">
+              <input type="date" id="dateFrom" />
+              <input type="date" id="dateTo" />
+            </div>
+          </div>
+          <div class="field">
+            <label for="language">LANGUAGE (hl)</label>
+            <input id="language" type="text" placeholder="e.g., en, fr, de" />
+          </div>
+          <div class="field">
+            <label for="location">LOCATION</label>
+            <input id="location" type="text" placeholder="e.g., United States, New York" />
+          </div>
+          <div class="field">
+            <label for="countryCode">COUNTRY CODE (gl)</label>
+            <input id="countryCode" type="text" placeholder="e.g., us, gb, de" />
+          </div>
+        </div>
+      </div>
+
       <!-- SECTION D: Listening Platform Selection & CTA Button -->
       <span class="source-label">Where Should We Scan?</span>
       <div class="source-cards">
@@ -940,6 +974,13 @@
       error:    document.getElementById("error"),
       head:     document.getElementById("resultsHead"),
       count:    document.getElementById("resultCount"),
+      dateFilter: document.getElementById("dateFilter"),
+      customDateRange: document.getElementById("customDateRange"),
+      dateFrom: document.getElementById("dateFrom"),
+      dateTo: document.getElementById("dateTo"),
+      language: document.getElementById("language"),
+      location: document.getElementById("location"),
+      countryCode: document.getElementById("countryCode"),
     };
 
     // Chip Tag State Management
@@ -1041,6 +1082,40 @@
       });
     });
 
+    // Date filter toggle: show/hide custom date inputs
+    els.dateFilter.addEventListener("change", () => {
+      const isCustom = els.dateFilter.value === "custom";
+      els.customDateRange.style.display = isCustom ? "flex" : "none";
+    });
+
+    function getFilters() {
+      const dateFilter = els.dateFilter.value;
+      const dateFrom = els.dateFrom.value;
+      const dateTo = els.dateTo.value;
+      const language = els.language.value.trim();
+      const location = els.location.value.trim();
+      const countryCode = els.countryCode.value.trim();
+
+      let tbs = "";
+      if (dateFilter === "custom") {
+        if (dateFrom && dateTo) {
+          // Convert YYYY-MM-DD to MM/DD/YYYY with leading zeros for SerpApi
+          const [fy, fm, fd] = dateFrom.split("-");
+          const [ty, tm, td] = dateTo.split("-");
+          tbs = `cdr:1,cd_min:${fm}/${fd}/${fy},cd_max:${tm}/${td}/${ty}`;
+        }
+      } else if (dateFilter) {
+        tbs = `qdr:${dateFilter}`;
+      }
+
+      return {
+        tbs,
+        language: language || undefined,
+        location: location || undefined,
+        countryCode: countryCode || undefined,
+      };
+    }
+
     function getSource() {
       return document.querySelector('input[name="source"]:checked').value;
     }
@@ -1108,6 +1183,7 @@
     async function findLeads() {
       // Combine pain point presets + custom tags
       const allPainPoints = [...Array.from(state.selectedPresets), ...state.customPainPoints];
+      const filters = getFilters();
 
       const payload = {
         category: els.category.value.trim(),
@@ -1116,6 +1192,7 @@
         painPoints: allPainPoints,
         excludeKeywords: state.excludeKeywords,
         source: getSource(),
+        filters,
       };
 
       if (!payload.category || !payload.audience) {
